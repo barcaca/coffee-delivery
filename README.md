@@ -43,7 +43,7 @@ O projeto segue a arquitetura de componentes de React. Os componentes são organ
 
 ## 🔗 Links
 
-- Live Site URL: [Vercel App](https://multi-step-form-snowy.vercel.app/)
+- Live Site URL: [Vercel App](https://coffee-delivery-olive.vercel.app)
 
 ### 🏆 **Conclusão**
 
