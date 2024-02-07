@@ -13,11 +13,11 @@ export function CardCoffeeCart({ coffee }: CardCoffeeCart) {
 
   const totalCoffee = coffee.price * coffee.quantity
 
-  function handleDecrease() {
-    changeCartItemQuantity(coffee.id, 'decrease')
-  }
   function handleIncrease() {
-    changeCartItemQuantity(coffee.id, 'increase')
+    changeCartItemQuantity(coffee.id, 1)
+  }
+  function handleDecrease() {
+    changeCartItemQuantity(coffee.id, -1)
   }
   function handleRemove() {
     removeCartItem(coffee.id)

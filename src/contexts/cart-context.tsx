@@ -1,11 +1,18 @@
 'use client'
 import { Coffee } from '@/components/coffee/card-coffee'
-import { produce } from 'immer'
+import {
+  addCartItemAction,
+  changeCartItemQuantityAction,
+  cleanCartAction,
+  removeCartItemAction,
+} from '@/reducers/actions'
+import { cartReducer } from '@/reducers/reducer'
 import {
   ReactNode,
   createContext,
   useContext,
   useEffect,
+  useReducer,
   useState,
 } from 'react'
 
@@ -33,10 +40,7 @@ interface CartContextType {
   addToCart: (coffee: CartItem) => void
   addUserData: (data: DataUserForm) => void
   removeCartItem: (cartItemId: string) => void
-  changeCartItemQuantity: (
-    cartItemId: string,
-    type: 'increase' | 'decrease',
-  ) => void
+  changeCartItemQuantity: (cartItemId: string, type: 1 | -1) => void
 }
 interface CartContextProviderProps {
   children: ReactNode
@@ -47,15 +51,7 @@ const COFFEE_ITEM_STORAGE_KEY = '@coffeeDelivery: cartItems'
 export const CartContext = createContext({} as CartContextType)
 
 export function CartContextProvider({ children }: CartContextProviderProps) {
-  const [cartItems, setCartItem] = useState<CartItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      const storedCartItems = localStorage.getItem(COFFEE_ITEM_STORAGE_KEY)
-      if (storedCartItems !== null) {
-        return JSON.parse(storedCartItems)
-      }
-    }
-    return []
-  })
+  const [cartItems, dispatch] = useReducer(cartReducer, [])
   const [dataUser, setDataUser] = useState<DataUserForm[]>([])
 
   const cartQuantity = cartItems.length
@@ -65,46 +61,19 @@ export function CartContextProvider({ children }: CartContextProviderProps) {
   }, 0)
 
   function addToCart(coffee: CartItem) {
-    const existsInCart = cartItems.findIndex((item) => item.id === coffee.id)
-    const newCart = produce(cartItems, (draft) => {
-      if (existsInCart < 0) {
-        draft.push(coffee)
-      } else {
-        draft[existsInCart].quantity += coffee.quantity
-      }
-    })
-    setCartItem(newCart)
-    console.log(newCart)
-  }
-  function changeCartItemQuantity(
-    cartItemId: string,
-    type: 'increase' | 'decrease',
-  ) {
-    const newCart = produce(cartItems, (draft) => {
-      const coffeeExistsInCart = draft.findIndex(
-        (item) => item.id === cartItemId,
-      )
-      if (type === 'increase') {
-        draft[coffeeExistsInCart].quantity++
-      } else {
-        draft[coffeeExistsInCart].quantity--
-      }
-    })
-    setCartItem(newCart)
+    dispatch(addCartItemAction(coffee))
   }
   function removeCartItem(cartItemId: string) {
-    const newCart = produce(cartItems, (draft) => {
-      const coffeeExistsInCart = draft.findIndex(
-        (item) => item.id === cartItemId,
-      )
-      draft.splice(coffeeExistsInCart, 1)
-    })
-    setCartItem(newCart)
+    dispatch(removeCartItemAction(cartItemId))
+  }
+  function changeCartItemQuantity(cartItemId: string, type: 1 | -1) {
+    dispatch(changeCartItemQuantityAction(cartItemId, type))
   }
   function cleanCart() {
     localStorage.removeItem(COFFEE_ITEM_STORAGE_KEY)
-    setCartItem([])
+    dispatch(cleanCartAction())
   }
+
   function addUserData(data: DataUserForm) {
     setDataUser([...dataUser, data])
   }
